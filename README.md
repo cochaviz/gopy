@@ -8,9 +8,3 @@ If you wanted to use the `go` package to create your own Go (please message me, 
 Any different versions of go could be made using the board size, and rulebooks paramaters. The rulebook should be easily extendable to allow for that.
 Just create a new rulebook and put that as a paramater in the `Game` object. 
 By default, the board size will be set to 19, and the ruleset will be the `Standard` (Korean) Go rules.
-
-## Starting
-
-Enter the gopy folder and run:
-
-```python3 launcher.py```
