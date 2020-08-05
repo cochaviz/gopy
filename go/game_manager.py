@@ -3,18 +3,27 @@ import os
 from go import component
 from go import rulebooks
 
-
 class Player:
     def __init__(self, color):
         self.color = color
-        self.captured_stones = 0
+        self.stones = []
 
     def place(self, row, col, board):
-        return board.place(component.Stone(self.color), row, col)
+        placed_stone = component.Stone(self.color)
+        
+        if board.place(placed_stone, row, col):
+            self.stones.append(placed_stone)
+            return True, placed_stone
+        return False, placed_stone
 
     def get_input(self):
         position = input("Player " + str(self.color) + " enter a position to place the stone at [row, column]: ")
-        position = list(map(int, position.split(", ")))
+        try:
+            position = list(map(int, position.split(", ")))
+            assert len(position) == 2
+        except:
+            print("Please enter properly formatted value of the form: row, column")
+            return self.get_input()
 
         return position[0], position[1]
 
@@ -31,16 +40,21 @@ class Game:
         self.rulebook = rulebook
 
     def start(self):
-        while True:
-            for player in self.players:
-                self.clear()
-
-                print(self.board)
-                group = self.make_move(player)
-
-                while not self.check_board(group):
-                    print("Please make a legal move!")
+        try:
+            while True:
+                for player in self.players:
+                    self.clear()
+                    print(self.board)
                     group = self.make_move(player)
+
+                    while not self.check_board(group):
+                        print("Please make a legal move!")
+                        group = self.make_move(player)
+
+        except KeyboardInterrupt:
+            self.clear()
+            print(self.board)
+            self.end_game()
 
     def make_move(self, player):
         row, col = player.get_input()
@@ -62,6 +76,14 @@ class Game:
             self.board.remove_group(group)
 
         return valid
+
+    def end_game(self):
+        scores = self.rulebook.count_scores(self.players)
+        print("Player " + str(scores.index(max(scores))) + " won!")
+
+        for index, score in enumerate(scores):
+            print("Player " + str(index) + " scored " + str(score) + " points")
+
 
     @staticmethod
     def clear():

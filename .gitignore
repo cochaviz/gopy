@@ -1,3 +1,4 @@
 .vscode/
 .idea/
 venv/
+go/__pycache__/
