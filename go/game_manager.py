@@ -10,11 +10,12 @@ class Player:
 
     def place(self, row, col, board):
         placed_stone = component.Stone(self.color)
-        
-        if board.place(placed_stone, row, col):
+        valid, placed_group = board.place(placed_stone, row, col)
+
+        if valid:
             self.stones.append(placed_stone)
-            return True, placed_stone
-        return False, placed_stone
+            return True, placed_group
+        return False, placed_group
 
     def get_input(self):
         position = input("Player " + str(self.color) + " enter a position to place the stone at [row, column]: ")
@@ -38,17 +39,22 @@ class Game:
             self.players.append(Player(i))
 
         self.rulebook = rulebook
+        self.states = set()
 
     def start(self):
         try:
             while True:
                 for player in self.players:
+                    # TEMPORARY
                     self.clear()
                     print(self.board)
+                    # TEMPORARY 
+
+                    self.states.add(hash(self.board))  
                     group = self.make_move(player)
 
                     while not self.check_board(group):
-                        print("Please make a legal move!")
+                        print("Please, make a legal move!")
                         group = self.make_move(player)
 
         except KeyboardInterrupt:
@@ -58,19 +64,19 @@ class Game:
 
     def make_move(self, player):
         row, col = player.get_input()
-        valid, group = player.place(row, col, self.board)
 
         try:
+            valid, group = player.place(row, col, self.board)
             if not valid:
                 print("Please put your stone in a an empty place!")
-                self.make_move(player)
+                return self.make_move(player)
         except IndexError:
             print("Please put your stone inside the board!")
-            self.make_move(player)
+            return self.make_move(player)
         return group
         
     def check_board(self, group):
-        valid, captured_groups = self.rulebook.check_current_move(self.board, group)
+        valid, captured_groups = self.rulebook.check_current_move(self.states, self.board, group)
         
         for group in captured_groups:
             self.board.remove_group(group)

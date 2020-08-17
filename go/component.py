@@ -5,7 +5,7 @@ class Board:
     def __init__(self, size):
         self.size = size
         self.matrix = []
-        self.groups = []
+        self.groups = set()
 
         for i in range(size):
             self.matrix.append([])
@@ -16,7 +16,7 @@ class Board:
         if self.matrix[row][col].color == -1:
             self.matrix[row][col] = stone
             return True, self.update_groups(stone, row, col) 
-        return False
+        return False, None
 
 
     def get_neighbours(self, row, col, stone=None):
@@ -71,9 +71,8 @@ class Board:
         for member_stone in merged_group:
             member_stone.group = merged_group
 
-        self.groups.append(merged_group)
+        self.groups.add(merged_group)
         return merged_group
-
 
     def add_to_group(self, stone, neighbours, group):
         group.add_vert_with_neighbours(stone, neighbours)
@@ -84,7 +83,7 @@ class Board:
         group = lib.Graph()
         group.add_vert_with_neighbours(stone, neighbours)
 
-        self.groups.append(group)
+        self.groups.add(group)
         for neighbour in neighbours:
             neighbour.group = group
 
@@ -99,11 +98,23 @@ class Board:
         for stone in group.get_vertices():
             stone.color = -1
 
+    def remove_groups(self, groups):
+        self.group = self.groups.difference(groups)
+
     def clamp(self, target_val, min_val=0, max_val=0):
         if max_val == 0:
             max_val = self.size - 1
 
         return max(min_val, min(target_val, max_val))
+
+    def __hash__(self):
+        string = ""
+
+        for row in self.matrix:
+            for element in row:
+                string += str(element)
+
+        return hash(string)
 
     def __str__(self):
         string = ""
