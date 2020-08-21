@@ -1,4 +1,6 @@
 .vscode/
 .idea/
 venv/
+test/__pycache__/
 go/__pycache__/
+
